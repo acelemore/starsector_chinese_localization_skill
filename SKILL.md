@@ -221,6 +221,36 @@ java -cp "l10n_work\classes;asm-9.7.jar;asm-tree-9.7.jar" SsJar patch 某.jar �
 4. `starfarer.api.jar` 未混淆，同样用常量替换。反编译只用于判断，不作为写回手段。
 5. 判断：跟随其后的调用若是 `addPara`、`setTooltip`、`addMessage`、按钮文字，则翻译。日志、`getId`、资源路径、异常类名不译。
 
+这一节只用于原版的 `starfarer.api.jar` 和 `starfarer_obf.jar`。模组 jar 先看下面的「模组源码」。
+
+## 模组源码
+
+翻译模组时，先找源码，用它判断哪些字符串给玩家看，再决定写回方式。不要只对着 jar 里的常量翻译。
+
+按这个顺序找：
+
+1. 模组根目录里的 `src/` 或 `source/`。里面可以是 `.java`，也可以是 `.kt`。
+2. `mod_info.json` 的 `source` 字段。
+3. 模组里的 README、更新说明、许可文件中的仓库地址。
+
+地址能打开时，浅克隆到 `l10n_work/projects/mods/<mod id>/upstream`，不要把仓库直接盖进已经安装的模组目录。克隆失败就告诉用户，不要换地址反复试。
+
+源码用来做这些判断：
+
+- `addPara`、`setTooltip`、`addMessage`、按钮文字要译。日志、异常、键名、路径不译。
+- 注释和被注释掉的调用不是玩家文本，不要译。
+- 一行字符串被加号拆成几段时，按源码里拼好的整句来译。
+- 传给 `String.format` 或 `addPara` 的 `%%` 要保留，它显示出来是一个 `%`。
+- Kotlin 字符串里的 `$名字` 是编译期拼接，不是规则文件里的 `$变量`。看源码确认它编译后变成哪几段常量。
+- 源码如果从 CSV、JSON 读文案，就译那些文件。jar 里只留键名和日志时，不要为了凑字去改 jar。
+
+写回：
+
+- `data/scripts` 下由游戏自己编译的 `.java`，直接改源码，不要打进 jar。
+- 玩家文字在 CSV、JSON 里时，改那些文件。
+- 玩家文字编进了 `mod_info.json` 的 `jars` 所列 jar 时：源码是普通 Java，并且模组带有能在命令行跑的构建（Gradle、Maven，或依赖只是游戏和模组依赖 jar）时，译源码后重新编译，用新 jar 换掉原来的 jar。Kotlin、只能用 IDE 构建、或依赖凑不齐时，不要自己凑一套编译。用源码选定要改的常量，再用 ASM 改现有 jar。
+- 原版 `starfarer_obf.jar` 仍然只做常量替换，不反编译重编。
+
 ## 写回前检查
 
 - 每条译文的名词类 `$变量` 与 `%` 占位符集合与原文一致。

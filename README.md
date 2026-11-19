@@ -44,6 +44,12 @@
 
 `starfarer_obf.jar` 的类名会重新混淆。先按方法内的英文字符串序列配对，再做序列对照，否则没改的句子会被看成大量新增和删除。`script` 以新版脚本为底，只译引号里的话。`options` 只译最后一个冒号后的显示文字。版本号保持新版英文。写回后用保存下来的英文目录和写回后的中文目录做下一版记忆。
 
+## 模组源码
+
+翻译模组时先找源码。模组自带 `src/` 或 `source/` 就直接读。没有的话看 `mod_info.json` 的 `source`，以及 README、更新说明里的仓库地址，浅克隆到 `l10n_work/projects/mods/<mod id>/upstream`。源码用来区分界面文字、日志和注释，也用来确认文案是在 CSV、JSON 里，还是在 jar 里。
+
+能在命令行编译的普通 Java 模组，可以译完源码后重新打包替换 jar。Kotlin 或只能用 IDE 构建时，用源码选定句子，再用 ASM 改现有 jar。游戏自己编译的 `data/scripts` 源码直接改，不打进 jar。
+
 ## 字体
 
 汉字要正常显示，需要 `graphics/fonts`（含 `.fnt`、`.png` 和 `dyn_font`）以及 `native/windows/ss_dyn_font.dll`。没有特殊情况时，这份 DLL 可以一直沿用。文件放在本目录的 `fonts/`，相对路径与游戏内一致，`fonts/` 不进仓库。
