@@ -1,10 +1,11 @@
 ---
 name: starsector-l10n
 description: >-
-  Localize the game Starsector (远行星号) into Simplified Chinese: CSV, lenient
-  JSON, loose Java sources, and jars. Use when translating Starsector, 远行星号,
-  starsector-core, rules.csv, starfarer.api.jar, or starfarer_obf.jar. Translations
-  must follow glossary.tsv in this skill.
+  Localize the game Starsector (远行星号) and its mods into Simplified Chinese:
+  CSV, lenient JSON, loose Java sources, and jars. Use when translating
+  Starsector, 远行星号, starsector-core, rules.csv, starfarer.api.jar,
+  starfarer_obf.jar, or a mod under mods/. Translations must follow
+  glossary.tsv in this skill.
 ---
 
 # 远行星号汉化
@@ -19,7 +20,7 @@ description: >-
 
 - 有上一版记忆：走下面的增量对照。英文没变的沿用记忆里的中文。英文改过或新出现的才翻译。记忆和 glossary.tsv 冲突时，以 glossary 为准。
 - 有旧版译文、还没有记忆：先做一次快照，以后按增量对照。也可以用对齐脚本按稳定 id、JSON 路径、方法内字符串序号套用，对不上的才翻译。
-- 从零翻译：不运行对齐脚本，也不套记忆。按字段表抽出全部玩家可见句子，按 glossary 翻译。表里没有的专名先按同类构词译出并写入 glossary，再译句子。
+- 从零翻译：不运行对齐脚本，也不套记忆。按字段表抽出全部玩家可见句子，按 glossary 翻译。表里没有的专名先按同类构词译出并写入 glossary，再译句子。某个模组第一次做，先按「模组清点」交规模清单，用户确认后再改文件。
 
 日志、异常、键名、路径三种情况下都不译。
 
@@ -40,7 +41,7 @@ python l10n_work\tools\extract_catalog.py --root starsector-core --cache l10n_wo
 python l10n_work\tools\diff_catalog.py --old l10n_work\projects\vanilla\memory\0.98.5a-RC7.jsonl --new l10n_work\projects\vanilla\incoming\新版本.jsonl --out l10n_work\projects\vanilla\diff\新版本
 ```
 
-模组把 `--project` 设为模组 id，`--kind mod`，`--en-root` / `--root` 指向该模组根目录。
+模组把 `--project` 设为 `mod_info.json` 的 `id`，`--kind mod`，`--en-root` / `--root` 指向该模组根目录。版本号用 `mod_info.json` 的 `version` 拼出来，并记下其中的 `gameVersion`。这次抽取只覆盖原版字段表，不含模组 jar，也不含模组自有的列和键。jsonl 的行数不是待译条数。做法见「模组清点」。
 
 对照按条目进行，不是看到相同英文就全局套用：
 
@@ -75,10 +76,10 @@ python l10n_work\tools\diff_catalog.py --old l10n_work\projects\vanilla\memory\0
 2. 用宽松 JSON 扫描器处理 `.json` `.faction` `.skill` `.variant`。游戏文件允许 `#` 与 `//` 注释、尾逗号、无引号键、单引号字符串、数字后的 `f`、个别分号当逗号。
 3. 按下面的字段表抽出句子。同一英文在已确认语境里只有一个译文时，可以复用。
 4. 翻译新句子。写回时保持文件还能被游戏解析。
-5. 只改这两个 jar 里玩家能看见的字符串：`starfarer.api.jar`、`starfarer_obf.jar`。日志、异常、键名、路径不译。
+5. 原版只改这两个 jar 里玩家能看见的字符串：`starfarer.api.jar`、`starfarer_obf.jar`。日志、异常、键名、路径不译。模组 jar 见「模组源码」。
 6. `data` 下的 `.java` 与任务/法典 `.txt` 由游戏运行时编译或直接显示，改源码，不要自己编进 jar。
-7. 成品镜像游戏相对路径，放到覆盖目录。安装脚本先整份备份 `starsector-core`，再覆盖。
-8. JSON 字符串替换完成后再把 `data/config/settings.json` 里的 `"cjkMode"` 设为 `true`（中日韩折行）。字体见下面的「字体」。
+7. 原版成品镜像游戏相对路径，放到覆盖目录。安装脚本先整份备份 `starsector-core`，再覆盖。模组成品见「模组清点」，不要备份或覆盖 `starsector-core`。
+8. JSON 字符串替换完成后再把游戏本体 `starsector-core/data/config/settings.json` 里的 `"cjkMode"` 设为 `true`（中日韩折行）。字体见下面的「字体」。模组自己的 `settings.json` 多半是数值覆盖，不要往里面写 `cjkMode`。
 
 ## 字体
 
@@ -150,6 +151,8 @@ python l10n_work\tools\diff_catalog.py --old l10n_work\projects\vanilla\memory\0
 
 人物、氏族、军官一律保留拉丁拼写，不要音译。glossary.tsv 里中文与英文相同的行就是这条规则。星球、星系、空间站若表中没有中文，也保留英文（Galatia、Volturn、Kazeron、Sindria、Askonia、Chicomoztoc、Tseen Ke）。
 
+由普通英文词拼出来、会显示给玩家的生成名称要译。只用来拼空间站名的词，按上面的空间站规则先留英文，在规模清单里单独一档。
+
 已锁定、容易译错的称呼：
 
 | 英文 | 中文 |
@@ -193,7 +196,7 @@ python l10n_work\tools\diff_catalog.py --old l10n_work\projects\vanilla\memory\0
 | tools/build_glossary.py | 从种子表生成 glossary.tsv |
 | tools/core_terms.py | 写出势力名表 |
 | tools/manual_json.py | 把短 JSON 字符串的人工译文写回暂存 |
-| tools/catalog.py | 从游戏或模组目录抽出可对照的字符串，并按分组做序列对照 |
+| tools/catalog.py | 从游戏或模组目录抽出可对照的字符串，并按分组做序列对照。只覆盖原版字段表；jar 只导出 `starfarer.api.jar` 和 `starfarer_obf.jar` |
 | tools/snapshot_memory.py | 把同一版本的纯英文目录和已汉化目录配成 `memory/<版本>.jsonl` |
 | tools/extract_catalog.py | 从新版纯英文目录抽出 `incoming/<版本>.jsonl` |
 | tools/diff_catalog.py | 对照记忆和新版英文，写出 unchanged / modified / added / removed |
@@ -204,9 +207,9 @@ python l10n_work\tools\diff_catalog.py --old l10n_work\projects\vanilla\memory\0
 javac -encoding UTF-8 -cp starsector-core\json.jar -d l10n_work\classes tools\SsCsv.java
 java -cp "l10n_work\classes;starsector-core\json.jar" SsCsv dump 输入.csv 输出.json
 java -cp "l10n_work\classes;starsector-core\json.jar" SsCsv write 输入.json 输出.csv
-javac -encoding UTF-8 -cp asm-9.7.jar;asm-tree-9.7.jar -d l10n_work\classes tools\SsJar.java
-java -cp "l10n_work\classes;asm-9.7.jar;asm-tree-9.7.jar" SsJar dump 某.jar 输出.jsonl
-java -cp "l10n_work\classes;asm-9.7.jar;asm-tree-9.7.jar" SsJar patch 某.jar 补丁.jsonl 输出.jar
+javac -encoding UTF-8 -cp l10n_work\lib\asm-9.7.jar;l10n_work\lib\asm-tree-9.7.jar -d l10n_work\classes tools\SsJar.java
+java -cp "l10n_work\classes;l10n_work\lib\asm-9.7.jar;l10n_work\lib\asm-tree-9.7.jar" SsJar dump 某.jar 输出.jsonl
+java -cp "l10n_work\classes;l10n_work\lib\asm-9.7.jar;l10n_work\lib\asm-tree-9.7.jar" SsJar patch 某.jar 补丁.jsonl 输出.jar
 ```
 
 ## JAR
@@ -221,7 +224,48 @@ java -cp "l10n_work\classes;asm-9.7.jar;asm-tree-9.7.jar" SsJar patch 某.jar �
 4. `starfarer.api.jar` 未混淆，同样用常量替换。反编译只用于判断，不作为写回手段。
 5. 判断：跟随其后的调用若是 `addPara`、`setTooltip`、`addMessage`、按钮文字，则翻译。日志、`getId`、资源路径、异常类名不译。
 
-这一节只用于原版的 `starfarer.api.jar` 和 `starfarer_obf.jar`。模组 jar 先看下面的「模组源码」。
+这一节只用于原版的 `starfarer.api.jar` 和 `starfarer_obf.jar`。模组 jar 先看下面的「模组清点」和「模组源码」。
+
+## 模组清点
+
+某个模组第一次翻译，先交规模清单，等用户确认再改文件。清单用已经安装的模组目录做。记忆放在 `l10n_work/projects/mods/<mod id>/`。
+
+```
+python l10n_work\tools\extract_catalog.py --root mods\<模组目录> --cache l10n_work\projects\mods\<mod id>\cache\<版本> --out l10n_work\projects\mods\<mod id>\incoming\<版本>.jsonl
+java -cp "l10n_work\classes;l10n_work\lib\asm-9.7.jar;l10n_work\lib\asm-tree-9.7.jar" SsJar dump mods\<模组目录>\jars\<mod_info 的 jars 所列 jar> l10n_work\projects\mods\<mod id>\cache\<版本>\jar\<jar 名>.jsonl
+```
+
+`extract_catalog.py` 的 jsonl 不是模组全文。行数里包含空单元格、注释、id、类名和路径。报数按玩家看见的句子，同时给出不重复条数和字符量。主数字包含两块：抽取器已经认出的句子，以及清点时自己找出来的玩家文本。大文件分开报：`strings.json`、规则正文、规则选项、规则脚本里的引号、`descriptions.csv`，其余已识别字段合成一档。
+
+下面三档单列，不并进主数字，除非用户要求并进去：
+
+- 按术语规则保留英文的名称碎片（空间站名生成词）
+- 只有开了控制台才出现的帮助
+- jar 里还没对照源码的句子
+
+计数时这些情况容易数错：
+
+- `strings.json`、`tips.json` 整份都是显示文字。值即使只有一个小写单词也要译。键不译。不要用「全小写、没有空格」把这些值滤掉。
+- 规则 `text` 按 `OR` 分段，每段算一条，空段不算。`options` 只算最后一个冒号后面的显示文字。`script` 只算引号里的自然语言，一整格脚本不是一条。
+- 单元格里的换行仍是同一条显示文字。
+- 句子中间的斜杠不是路径。带空格或标点的句子要译。路径是 `graphics/`、`data/`、`sounds/`、带扩展名的文件，或没有空格的整段路径。
+- 名称表只数数组里的值，不数对象的键。同一显示词写在多个文件里时，报不重复条数和写入处数。
+- `#` 开头的行，以及被注释掉的调用，不译。
+- 文件名里带 rules 不等于原版规则表。只有 `campaign/rules.csv` 和 `campaign/rules/*.csv` 按 7 列处理。旁边的表先读表头。
+
+[reference.md](reference.md) 的字段表是原版的。模组多出来的玩家文本，抽取器会漏，清点时要自己找：
+
+- 表头不在原版字段表里、单元格却是名称或描述的 CSV。先读表头，再决定哪些列要译。
+- 原版键表没有、但值是给玩家看的说明的键。`tip` 在表里，`tooltip` 不在；同文件的 `name` 仍会被抽到，不要因此当成整份文件都已覆盖。
+- 字段表以外、值是短语或句子的自定义键。值若是 id、类名或数值，不译。
+- 名称数组里的显示词，以及会显示出来的序数后缀。这些是显示碎片，要译。
+- 空间站名生成词按「人名与星球」留英文，先单列。
+- `mod_info.json` 的 `name` 和 `description` 出现在模组列表里，要计入。`author` 和版本号不译。
+- 控制台命令的 `help` 列。单列。
+
+jar 的句子等源码。没有源码时，把像句子的常量分成三档再报：调试、测试、异常（不译）；版本更新这类玩家对话框（计入）；其余（待复核）。不要报常量总数。和 `strings.json` 完全相同的句子不要算两次。jar 里的短词多半是查表键，键不译。
+
+模组成品放在 `output/mods/<mod id>/`，相对路径从模组根目录算。不要改模组的版本号。
 
 ## 模组源码
 
@@ -231,9 +275,10 @@ java -cp "l10n_work\classes;asm-9.7.jar;asm-tree-9.7.jar" SsJar patch 某.jar �
 
 1. 模组根目录里的 `src/` 或 `source/`。里面可以是 `.java`，也可以是 `.kt`。
 2. `mod_info.json` 的 `source` 字段。
-3. 模组里的 README、更新说明、许可文件中的仓库地址。
+3. jar 旁边的 `src.txt`，以及 `jars/src.txt`。仓库地址可能写在这里，`mod_info.json` 未必有 `source` 字段。
+4. 模组里的 README、更新说明、许可文件中的仓库地址。
 
-地址能打开时，浅克隆到 `l10n_work/projects/mods/<mod id>/upstream`，不要把仓库直接盖进已经安装的模组目录。克隆失败就告诉用户，不要换地址反复试。
+数据文件的规模清单不依赖源码，先做。要判断 jar 里哪些常量给玩家看时，再浅克隆到 `l10n_work/projects/mods/<mod id>/upstream`，不要把仓库直接盖进已经安装的模组目录。克隆失败就告诉用户，不要换地址反复试。没有源码就不要开始改 jar。
 
 源码用来做这些判断：
 
