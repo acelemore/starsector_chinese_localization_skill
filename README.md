@@ -24,7 +24,8 @@
 | [glossary.tsv](glossary.tsv) | 英文、中文、来源。已有译名不得另起炉灶 |
 | [factions.tsv](factions.tsv) | 势力名 |
 | [reference.md](reference.md) | CSV 列、JSON 键、源码和安装包布局 |
-| [tools](tools) | 解析和写回脚本 |
+| [tools](tools) | 解析、对照和写回脚本 |
+| `fonts/` | 本机字体，不进仓库。缺了就按 SKILL.md 请用户提供汉化 zip |
 
 ## 两种起点
 
@@ -34,6 +35,20 @@
 - 从零翻译：不运行对齐脚本。按字段表抽出玩家可见句子，按术语表翻译。表里没有的专名先写入术语表，再译句子。
 
 日志、异常、键名、路径两种情况下都不译。jar 只改 `starfarer.api.jar` 和 `starfarer_obf.jar` 里玩家能看见的字符串。
+
+## 增量翻译
+
+原版放在 `l10n_work/projects/vanilla/`，每个模组放在 `l10n_work/projects/mods/<mod id>/`。更新前用 `snapshot_memory.py` 把纯英文目录和已汉化目录配成记忆。更新后用 `extract_catalog.py` 抽出新英文，再用 `diff_catalog.py` 逐条对照。
+
+英文没变的沿用旧译文。同一位置英文被改过的记为 modified，按新英文重译；只是错字、旧中文已经表达修正后的意思时，沿用旧中文。新增和删除单独列出。不要因为别处出现过相同英文就套用。
+
+`starfarer_obf.jar` 的类名会重新混淆。先按方法内的英文字符串序列配对，再做序列对照，否则没改的句子会被看成大量新增和删除。`script` 以新版脚本为底，只译引号里的话。`options` 只译最后一个冒号后的显示文字。版本号保持新版英文。写回后用保存下来的英文目录和写回后的中文目录做下一版记忆。
+
+## 字体
+
+汉字要正常显示，需要 `graphics/fonts`（含 `.fnt`、`.png` 和 `dyn_font`）以及 `native/windows/ss_dyn_font.dll`。没有特殊情况时，这份 DLL 可以一直沿用。文件放在本目录的 `fonts/`，相对路径与游戏内一致，`fonts/` 不进仓库。
+
+缺少这些文件时，请用户到远行星号中文站 <https://www.fossic.org/> 下载「覆盖压缩包」版本的汉化，把 zip 交给代理处理。代理不要自己下载。
 
 ## 脚本
 

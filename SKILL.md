@@ -15,12 +15,59 @@ description: >-
 
 ## 两种起点
 
-流程相同。先看有没有一份旧版译文可以对照。
+流程相同。先看有没有上一版记忆或一份旧版译文可以对照。
 
-- 有旧版译文：英文与语境都相同的句子沿用那份译文。CSV 按稳定 id 和 rules 结构对齐，JSON 按路径对齐，jar 按方法内字符串序号对齐。对不上的才翻译。旧译文和 glossary.tsv 冲突时，以 glossary 为准。
-- 从零翻译：不运行对齐脚本。按字段表抽出全部玩家可见句子，按 glossary 翻译。表里没有的专名先按同类构词译出并写入 glossary，再译句子。
+- 有上一版记忆：走下面的增量对照。英文没变的沿用记忆里的中文。英文改过或新出现的才翻译。记忆和 glossary.tsv 冲突时，以 glossary 为准。
+- 有旧版译文、还没有记忆：先做一次快照，以后按增量对照。也可以用对齐脚本按稳定 id、JSON 路径、方法内字符串序号套用，对不上的才翻译。
+- 从零翻译：不运行对齐脚本，也不套记忆。按字段表抽出全部玩家可见句子，按 glossary 翻译。表里没有的专名先按同类构词译出并写入 glossary，再译句子。
 
-日志、异常、键名、路径两种情况下都不译。
+日志、异常、键名、路径三种情况下都不译。
+
+## 增量翻译
+
+原版和每个模组分开存放，记忆不能混用。
+
+- 原版：`l10n_work/projects/vanilla/`
+- 模组：`l10n_work/projects/mods/<mod id>/`
+
+每个项目有 `memory/<版本>.jsonl`（该版英文和已经写出的中文）、`incoming/<版本>.jsonl`（新版英文）、`diff/<版本>/`（对照结果）。`l10n_work/chunks/` 和 `l10n_work/state/` 是 0.98.5a-RC7 的工作档案，新版本写进项目目录，不要追加到那里。
+
+更新前先快照。英文目录必须是纯英文（更新前的 `starsector-core.backup`），中文目录是已经汉化的那一版。0.98.5a-RC7 的原版记忆已经写好。游戏更新后 `starsector-core` 会变成新版纯英文，那时再抽取、对照。
+
+```
+python l10n_work\tools\snapshot_memory.py --project vanilla --version 0.98.5a-RC7 --kind vanilla --en-root starsector-core.backup --zh-root starsector-core
+python l10n_work\tools\extract_catalog.py --root starsector-core --cache l10n_work\projects\vanilla\cache\新版本 --out l10n_work\projects\vanilla\incoming\新版本.jsonl
+python l10n_work\tools\diff_catalog.py --old l10n_work\projects\vanilla\memory\0.98.5a-RC7.jsonl --new l10n_work\projects\vanilla\incoming\新版本.jsonl --out l10n_work\projects\vanilla\diff\新版本
+```
+
+模组把 `--project` 设为模组 id，`--kind mod`，`--en-root` / `--root` 指向该模组根目录。
+
+对照按条目进行，不是看到相同英文就全局套用：
+
+- CSV：分组是「文件 + 键 + 列」。同一 id 出现多次时，按该文件里的出现顺序做序列对照。
+- JSON：分组是「文件 + 字段路径」。
+- Java、txt、jar：分组是同一个文件，或同一个方法（类 + 方法 + 描述符）里的字符串序列。方法内序号跨版本会变，所以用序列对照。同一版本的中英文 jar 仍按序号配对，因为中文 jar 是在那一版英文 jar 上替换出来的。
+
+四类结果：
+
+- `unchanged.jsonl`：英文没变，沿用 `zh`。
+- `modified.jsonl`：同一位置的英文被改过，哪怕没有新增行。`old_zh` 只作参考。
+- `added.jsonl`：新句子，按术语表翻译。
+- `removed.jsonl`：新版已没有，不要写回。
+
+`starfarer_obf.jar` 的类名和方法名会随版本重新混淆。按容器名直接对照，会把没改的句子看成上万条新增和删除。先按「同一个方法里的英文字符串序列」做指纹配对：指纹相同就整段沿用旧译文，指纹不同再用序列对照。`starfarer.api.jar` 的类名稳定，可以按类名和方法名对照。同一版本的中英文 jar 仍按方法内序号配对，因为中文 jar 是在那一版英文 jar 上替换出来的。
+
+写回：
+
+- `unchanged` 按新版的位置写入记忆里的中文。
+- 正文有改动时按新英文重译。英文只是错字、旧中文已经是修正后的意思时，沿用旧中文。
+- `script` 以新版脚本为底，只译引号里的自然语言。不要用旧脚本整段覆盖，否则会退回旧逻辑。
+- `options` 保留新版选项 id，只译最后一个冒号后面的显示文字。
+- 句子挪到新的规则 id、原来的格子被清空时，空格子保持空白，译文写到新位置。
+- 版本号保持新版英文，不要把旧版本号写回去。
+- 日志、异常、键名、路径、类名、音效 id、市场 id，以及 `DEV` 调试行，即使落在 `modified` 或 `added` 里也不译。
+
+写回会盖掉纯英文目录。下一版记忆用写回前保存的 `incoming` 英文目录，配上写回后再抽出的中文目录。
 
 ## 工作流
 
@@ -31,7 +78,18 @@ description: >-
 5. 只改这两个 jar 里玩家能看见的字符串：`starfarer.api.jar`、`starfarer_obf.jar`。日志、异常、键名、路径不译。
 6. `data` 下的 `.java` 与任务/法典 `.txt` 由游戏运行时编译或直接显示，改源码，不要自己编进 jar。
 7. 成品镜像游戏相对路径，放到覆盖目录。安装脚本先整份备份 `starsector-core`，再覆盖。
-8. `data/config/settings.json` 里 `"cjkMode"` 设为 `true`（中日韩折行）。位图字体需含常用汉字，否则只剩方框。替换 `graphics/fonts` 下的 `.fnt` 与 `.png`，并附带 `graphics/fonts/dyn_font` 与 `native/windows/ss_dyn_font.dll`。动态字体 DLL 必须与当前游戏版本匹配。
+8. JSON 字符串替换完成后再把 `data/config/settings.json` 里的 `"cjkMode"` 设为 `true`（中日韩折行）。字体见下面的「字体」。
+
+## 字体
+
+汉字要正常显示，游戏里必须有这些文件，否则界面只剩方框：
+
+- `graphics/fonts` 下的 `.fnt`、`.png`，以及其中的 `dyn_font`
+- `native/windows/ss_dyn_font.dll`
+
+没有特殊情况时，这份动态字体 DLL 可以一直沿用，不必随小版本更换。本机已经备好时，放在技能目录的 `fonts/` 下，相对路径与游戏内一致，安装时覆盖到 `starsector-core`。
+
+动手写回或安装之前先检查这些文件在不在。缺任何一个，就停下来告诉用户：到远行星号中文站 <https://www.fossic.org/> 下载「覆盖压缩包」版本的汉化，把下载到的 zip 交给代理。不要自己去下载。用户交出 zip 之后，从包里取出上面的字体和 `ss_dyn_font.dll`，覆盖进 `starsector-core` 的对应位置，并放到技能目录的 `fonts/` 里供以后使用。
 
 ## 必须遵守的译法
 
@@ -129,12 +187,16 @@ description: >-
 | tools/split_chunks.py | 把待译唯一字符串切成每批 80 条的 `chunks/in/NNN.json` |
 | tools/validate_chunk.py | `python validate_chunk.py NNN`。核对条数、`i`、名词类 `$变量`。百分号后的英文单词会被误报，代词类 `$变量` 可以省略 |
 | tools/merge_chunks.py | 按 `pending.jsonl` 的位置，把 `chunks/out` 写回暂存 CSV 的副本。默认只统计；`--apply` 写到 `state/merged`，不改 `state/staged` |
-| tools/align_jars.py | 有旧版译文时，按方法内字符串序号把旧 jar 的中文对齐到新 jar。序号对不上或英文已变的，按待译处理。从零翻译时不用 |
+| tools/align_jars.py | 类名稳定时，按方法内字符串序号把旧 jar 的中文对齐到新 jar。`starfarer_obf.jar` 类名会变，改用 catalog 的序列指纹。从零翻译时不用 |
 | tools/SsJar.java | `dump` 导出 LDC；`patch` 用 ASM 改字符串并重打 jar。`ClassWriter(0)`，不重算栈图 |
 | tools/compare_csv.py | 确认 Java 解析结果与同一套解码后的对照一致 |
 | tools/build_glossary.py | 从种子表生成 glossary.tsv |
 | tools/core_terms.py | 写出势力名表 |
 | tools/manual_json.py | 把短 JSON 字符串的人工译文写回暂存 |
+| tools/catalog.py | 从游戏或模组目录抽出可对照的字符串，并按分组做序列对照 |
+| tools/snapshot_memory.py | 把同一版本的纯英文目录和已汉化目录配成 `memory/<版本>.jsonl` |
+| tools/extract_catalog.py | 从新版纯英文目录抽出 `incoming/<版本>.jsonl` |
+| tools/diff_catalog.py | 对照记忆和新版英文，写出 unchanged / modified / added / removed |
 
 编译与调用：
 

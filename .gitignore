@@ -2,3 +2,6 @@ __pycache__/
 *.class
 *.log
 .DS_Store
+
+# 本机字体，不提交。
+fonts/
