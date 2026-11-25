@@ -94,7 +94,7 @@ python l10n_work\tools\diff_catalog.py --old l10n_work\projects\vanilla\memory\0
 
 ## 必须遵守的译法
 
-- 简体中文，科幻军事书面语。中文之间不加空格。拉丁字母或数字与汉字相邻时留一个空格。对白用「」。术语表里的译名自带 ASCII 引号时，照表保留。
+- 简体中文，科幻军事书面语。中文之间不加空格。拉丁字母或数字与汉字相邻时留一个空格。对白用""（英文引号）。术语表里的译名自带 ASCII 引号时，照表保留。
 - 同一个英文在不同条目里按该条的语境译。英文相同并不等于译文相同，不要整表替换。
 - `$变量`、`$变量.方法` 原样保留，大小写不变。名词类变量（势力、市场、舰船、人名、金额、天数、数量）一个都不能丢。核对变量时只认 ASCII，避免把变量后面的汉字算进变量名。
 - 纯语法变量可以删或挪位置：以 `AOrAn`、`aOrAn`、`IsOrAre`、`isOrAre`、`hasOrHave`、`HasOrHave`、`OnOrAt`、`onOrAt`、`orOnAt`、`SirOrMadam`、`postArticle`、`pronoun` 结尾的，以及 `$heOrShe` `$HeOrShe` `$hisOrHer` `$HisOrHer` `$hisOrHerself` `$himOrHer` `$himOrHerself` `$hesOrShes`。势力文件里的 `personNamePrefixAOrAn`、`displayNameIsOrAre` 中文版留空字符串。若某个键的值本身就是 is、are、a、an 这种还会被拼进别的句子的词，中文写成「是」或「有」，不要留空。
