@@ -22,10 +22,11 @@
 |---|---|
 | [SKILL.md](SKILL.md) | 译法、两种起点、jar 补丁方式和写回前检查 |
 | [glossary.tsv](glossary.tsv) | 英文、中文、来源。已有译名不得另起炉灶 |
+| [intel_tags.tsv](intel_tags.tsv) | 情报面板标签的 id 与中文译名对照。同一标签只许一种中文 |
 | [factions.tsv](factions.tsv) | 势力名 |
 | [reference.md](reference.md) | CSV 列、JSON 键、源码和安装包布局 |
 | [tools](tools) | 解析、对照和写回脚本 |
-| `fonts/` | 本机字体，不进仓库。缺了就按 SKILL.md 请用户提供汉化 zip |
+| `fonts/` | 字体文件，不进仓库。缺了就按 SKILL.md 请用户提供汉化 zip |
 
 ## 两种起点
 
@@ -50,6 +51,10 @@
 
 能在命令行编译的普通 Java 模组，可以译完源码后重新打包替换 jar。Kotlin 或只能用 IDE 构建时，用源码选定句子，再用 ASM 改现有 jar。游戏自己编译的 `data/scripts` 源码直接改，不打进 jar。
 
+## 情报标签
+
+情报面板的筛选按钮分两层：`getIntelTags()` 返回的是标签 **id**，中文名写在 `data/config/tag_data.json` 的 `name` 里。id 必须保持英文原串；把 id 当正文译掉，同一类情报就会裂成两个按钮。原版总表要覆盖全部原版 id，模组专属 id 写进模组自己的 `data/config/tag_data.json`，势力 id 不写（面板直接显示势力名）。译名表见 [intel_tags.tsv](intel_tags.tsv)，检查脚本是 `tools/intel_tags.py`。
+
 ## 字体
 
 汉字要正常显示，需要 `graphics/fonts`（含 `.fnt`、`.png` 和 `dyn_font`）以及 `native/windows/ss_dyn_font.dll`。没有特殊情况时，这份 DLL 可以一直沿用。文件放在本目录的 `fonts/`，相对路径与游戏内一致，`fonts/` 不进仓库。
@@ -58,7 +63,7 @@
 
 ## 脚本
 
-脚本顶部写死了本机工作目录 `d:\Game\Starsector\l10n_work`。换机器时只改这一处。
+脚本开头写死了工作目录（`l10n_work`，个别脚本写成绝对路径）。换机器时只改这一处。
 
 游戏自带 JDK 为 Java 17。CSV 写出依赖游戏的 `starsector-core\json.jar`。JAR 补丁依赖 ASM 9.7。反编译只用 CFR 看上下文，不作为写回。
 

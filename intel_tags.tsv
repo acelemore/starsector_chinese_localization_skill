@@ -1,0 +1,37 @@
+# 情报面板标签（intel tags）基线译名表：原版 id 的固定译法，外加多模组共用的约定 id。
+# id 一律用英文原字符串（tag_data.json 的键、jar 内常量），中文只出现在 tag_data.json 的 name 字段。
+# 模组标签按项目往上追加，owner 列写 mod id；同一个概念只保留一行。
+New	新消息	vanilla
+Important	重要	vanilla
+Story	故事	vanilla
+Major events	重大事件	vanilla
+Colony threats	殖民地威胁	vanilla
+Accepted	已接受	vanilla
+Exploration	探索	vanilla
+Fleet log	舰队日志	vanilla
+Luddic shrines	卢德圣地	vanilla
+Bounties	赏金	vanilla
+Contacts	联络人	vanilla
+Local	本地	vanilla
+Missions	任务	vanilla
+Marker	标记	vanilla
+Military	军事行动	vanilla
+Salvage	打捞	vanilla
+Warning beacons	警告信标	vanilla
+Gates	星门	vanilla
+Comm sniffers	通讯嗅探	vanilla
+Trade	贸易	vanilla
+Smuggling	走私	vanilla
+Commission	雇佣协议	vanilla
+Agreements	协议	vanilla
+Hostilities	敌对活动	vanilla
+Fleet departures	舰队离港	vanilla
+Decivilized	文明丧失	vanilla
+Production	生产	vanilla
+Sons of Andrada	Andrada 之子	vanilla
+Personal	个人	shared
+
+# 势力 id 也会以标签形式出现在 getIntelTags() 里，但面板直接显示该势力的 displayName 与势力色：
+# 不要写 tag_data，也不要另起中文名（写了会盖掉势力名，还容易按字面译错）。
+# 判断方法：搜 data/world/factions/*.faction 里的 id:，命中即是势力，如 pirates、tritachyon、remnant。
+# 要改势力名就改 .faction 的 displayName；只有要改颜色时才写 tag_data。

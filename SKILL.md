@@ -31,17 +31,17 @@ description: >-
 - 原版：`l10n_work/projects/vanilla/`
 - 模组：`l10n_work/projects/mods/<mod id>/`
 
-每个项目有 `memory/<版本>.jsonl`（该版英文和已经写出的中文）、`incoming/<版本>.jsonl`（新版英文）、`diff/<版本>/`（对照结果）。`l10n_work/chunks/` 和 `l10n_work/state/` 是 0.98.5a-RC7 的工作档案，新版本写进项目目录，不要追加到那里。
+每个项目有 `memory/<版本>.jsonl`（该版英文和已经写出的中文）、`incoming/<版本>.jsonl`（新版英文）、`diff/<版本>/`（对照结果）。`l10n_work/chunks/`、`l10n_work/state/` 是历史遗留的整包档案，新版本写进项目目录，不要追加到那里。
 
-更新前先快照。英文目录必须是纯英文（更新前的 `starsector-core.backup`），中文目录是已经汉化的那一版。0.98.5a-RC7 的原版记忆已经写好。游戏更新后 `starsector-core` 会变成新版纯英文，那时再抽取、对照。
+更新前先快照。英文目录必须是纯英文（更新前的 `starsector-core.backup`），中文目录是已经汉化的那一版。同一版本已经有记忆时直接做增量；没有就先快照建立基线。游戏更新后 `starsector-core` 会变成新版纯英文，那时再抽取、对照。
 
 ```
-python l10n_work\tools\snapshot_memory.py --project vanilla --version 0.98.5a-RC7 --kind vanilla --en-root starsector-core.backup --zh-root starsector-core
-python l10n_work\tools\extract_catalog.py --root starsector-core --cache l10n_work\projects\vanilla\cache\新版本 --out l10n_work\projects\vanilla\incoming\新版本.jsonl
-python l10n_work\tools\diff_catalog.py --old l10n_work\projects\vanilla\memory\0.98.5a-RC7.jsonl --new l10n_work\projects\vanilla\incoming\新版本.jsonl --out l10n_work\projects\vanilla\diff\新版本
+python l10n_work\tools\snapshot_memory.py --project vanilla --version <版本> --kind vanilla --en-root starsector-core.backup --zh-root starsector-core
+python l10n_work\tools\extract_catalog.py --root starsector-core --cache l10n_work\projects\vanilla\cache\<新版本> --out l10n_work\projects\vanilla\incoming\<新版本>.jsonl
+python l10n_work\tools\diff_catalog.py --old l10n_work\projects\vanilla\memory\<版本>.jsonl --new l10n_work\projects\vanilla\incoming\<新版本>.jsonl --out l10n_work\projects\vanilla\diff\<新版本>
 ```
 
-模组把 `--project` 设为 `mod_info.json` 的 `id`，`--kind mod`，`--en-root` / `--root` 指向该模组根目录。版本号用 `mod_info.json` 的 `version` 拼出来，并记下其中的 `gameVersion`。这次抽取只覆盖原版字段表，不含模组 jar，也不含模组自有的列和键。jsonl 的行数不是待译条数。做法见「模组清点」。
+模组把 `--project` 设为 `mod_info.json` 的 `id`，`--kind mod`，`--en-root` / `--root` 指向该模组根目录。版本号用 `mod_info.json` 的 `version` 拼出来，并记下其中的 `gameVersion`。该抽取只覆盖原版字段表，不含模组 jar，也不含模组自有的列和键。jsonl 的行数不是待译条数。做法见「模组清点」。
 
 对照按条目进行，不是看到相同英文就全局套用：
 
@@ -88,13 +88,13 @@ python l10n_work\tools\diff_catalog.py --old l10n_work\projects\vanilla\memory\0
 - `graphics/fonts` 下的 `.fnt`、`.png`，以及其中的 `dyn_font`
 - `native/windows/ss_dyn_font.dll`
 
-没有特殊情况时，这份动态字体 DLL 可以一直沿用，不必随小版本更换。本机已经备好时，放在技能目录的 `fonts/` 下，相对路径与游戏内一致，安装时覆盖到 `starsector-core`。
+没有特殊情况时，这份动态字体 DLL 可以一直沿用，不必随小版本更换。机器上已经备好时，放在技能目录的 `fonts/` 下，相对路径与游戏内一致，安装时覆盖到 `starsector-core`。
 
 动手写回或安装之前先检查这些文件在不在。缺任何一个，就停下来告诉用户：到远行星号中文站 <https://www.fossic.org/> 下载「覆盖压缩包」版本的汉化，把下载到的 zip 交给代理。不要自己去下载。用户交出 zip 之后，从包里取出上面的字体和 `ss_dyn_font.dll`，覆盖进 `starsector-core` 的对应位置，并放到技能目录的 `fonts/` 里供以后使用。
 
 ## 必须遵守的译法
 
-- 简体中文，科幻军事书面语。中文之间不加空格。拉丁字母或数字与汉字相邻时留一个空格。对白用""（英文引号）。术语表里的译名自带 ASCII 引号时，照表保留。
+- 简体中文，科幻军事书面语。中文之间不加空格。拉丁字母或数字与汉字相邻时留一个空格。对白用「」。术语表里的译名自带 ASCII 引号时，照表保留。
 - 同一个英文在不同条目里按该条的语境译。英文相同并不等于译文相同，不要整表替换。
 - `$变量`、`$变量.方法` 原样保留，大小写不变。名词类变量（势力、市场、舰船、人名、金额、天数、数量）一个都不能丢。核对变量时只认 ASCII，避免把变量后面的汉字算进变量名。
 - 纯语法变量可以删或挪位置：以 `AOrAn`、`aOrAn`、`IsOrAre`、`isOrAre`、`hasOrHave`、`HasOrHave`、`OnOrAt`、`onOrAt`、`orOnAt`、`SirOrMadam`、`postArticle`、`pronoun` 结尾的，以及 `$heOrShe` `$HeOrShe` `$hisOrHer` `$HisOrHer` `$hisOrHerself` `$himOrHer` `$himOrHerself` `$hesOrShes`。势力文件里的 `personNamePrefixAOrAn`、`displayNameIsOrAre` 中文版留空字符串。若某个键的值本身就是 is、are、a、an 这种还会被拼进别的句子的词，中文写成「是」或「有」，不要留空。
@@ -107,6 +107,39 @@ python l10n_work\tools\diff_catalog.py --old l10n_work\projects\vanilla\memory\0
 - 不要翻译：`id`、类名、插件、`tags`、图标路径、音效 id、`hullId`、`variantId`、舰名前缀（如 `HSS`）、`name_gen_data.csv` 里的神话专名、`person_names.csv`。
 - `uiTags` 是界面分类，要译（护盾、相位）。`tags` 是逻辑标签，不译。
 - 任务难度 `EASY`/`MEDIUM`/`HARD` 是枚举，不译。
+- 情报标签（intel tags）也是 id：`getIntelTags()` 返回的字符串不译，中文只写进 `data/config/tag_data.json` 的 `name`。译了 id，同一类情报会被拆成两个按钮。见「情报标签（intel tags）」。
+
+## 情报标签（intel tags）
+
+情报面板的筛选按钮由两部分拼出来：intel 插件 `getIntelTags()` 返回的字符串（标签 **id**），和 `data/config/tag_data.json` 里同 id 的 `name`（显示名）。**id 与显示名必须分开**：id 永远保持英文原串，中文只写在 `tag_data.json`。把 `getIntelTags()` 里的字符串当正文译掉，就会多出一个标签 id，同一类情报并排变成两个按钮。
+
+- 不译、不改：`Tags.INTEL_*` 常量、`getIntelTags()` 里的字面量、模组 `strings.json` 里给标签用的值、`tag_data.json` 的键。译名只写 `name`。
+- 原版 `starsector-core/data/config/tag_data.json` 是总表。原版全部 id 都要有 `name`：文件里 `Contacts`、`Local`、`Missions`、`Bounties` 等默认是注释掉的，不补就一直显示英文。
+- 模组可以有 `mods/<模组>/data/config/tag_data.json`，按 id 合并。模组专属 id 写进模组自己的表；多个模组共用的约定 id（如 `Personal` 表示「个人」）写进原版表。
+- 一个 id 只能有一个中文名。两个 id 用同一个中文名，会得到两个同名按钮，同样算错。
+- `putFirst: true` 的标签即使 0 条情报也会常驻显示。不要给中文 id 写 `putFirst`，也不要给同一个概念另建中文 id，否则会多出「某某 (0)」这种幽灵按钮。
+- 字段：`name` 必填；`color`、`width`、`putFirst`、`sort` 可选。不写 `width` 时按钮按文字自动定宽。
+- 势力 id 也会作为标签出现（`pirates`、`tritachyon`、`remnant` 等）。面板遇到势力 id 会直接显示该势力的 `displayName` 和势力色，所以**不要给它写 `tag_data`**：写了就盖掉势力名，还容易按字面另译错。要改名字就改 `.faction` 的 `displayName`；只有要改颜色时才写 `tag_data`。
+- 面板还会硬编码 `New`、`Important`、`Major events` 三个 id，同样靠 `tag_data` 出中文。
+
+找标签的办法：
+
+- jar：`SsJar dump` 后筛 `"m":"getIntelTags"`。两点容易漏：`static final String`（`Tags.INTEL_*`）以 ConstantValue 存在，不会出现在 LDC dump 里；标签也可能由 helper 方法（`addXxxTags(Set)`）或枚举字段加进去。
+- 数据驱动：有些模组用 `StringHelper.getString(group, key)`、`getString()` 之类把 `strings.json` 的**值**当 id。改这些值之前先看这个键还在哪些方法里用（排序串、配置加载、经济结算、胜负判定、图标等）：只有 `getIntelTags` 用的才能改成英文 id，否则保留中文值——它本身就是唯一的中文名，不会分裂。
+- 带下划线的小写 id 先当势力 id 查：搜 `data/world/factions/*.faction` 里的 `id:`，命中就什么都不用做。
+- 旧汉化可能在 jar 里留下中文标签（当初把 id 当正文译过），dump 后按 CJK 过滤就能发现。
+- 专名以当前安装文件的译文为准（`.faction` 的 `displayName`、已安装 jar 的 dump），不要拿项目里旧的中间产物定名。
+
+核对（在游戏目录先 dump，再跑检查）：
+
+```
+java -cp "l10n_work\classes;l10n_work\lib\asm-9.7.jar;l10n_work\lib\asm-tree-9.7.jar" SsJar dump <jar> l10n_work\tagscan\<名字>.jsonl
+python <技能目录>\tools\intel_tags.py --dumps l10n_work\tagscan
+```
+
+脚本列出：没有中文名的英文 id、仍是中文的 id、多个 id 共用一个中文名、同一个 id 在不同 `tag_data.json` 里译名不一致、「中文 id 和某个英文 id 的译名相同」（同一标签被拆成两个），以及「给势力 id 写了 `tag_data`」。有以上情况时退出码非 0。中文 id 只允许出现在本身就以中文命名、且没有英文同名的模组标签上。
+
+原版标签的固定译名见 [intel_tags.tsv](intel_tags.tsv)。模组标签按项目往上追加，新标签先查表、再落盘、最后补表；同一个概念只保留一行。
 
 ## 核心专名
 
@@ -178,7 +211,7 @@ python l10n_work\tools\diff_catalog.py --old l10n_work\projects\vanilla\memory\0
 
 ## 工具脚本
 
-解析和写回用同目录 [tools](tools)，不要另写 CSV/JSON/JAR 解析器。脚本顶部写死了本机工作目录 `d:\Game\Starsector\l10n_work`；换机器时只改这一处路径。
+解析和写回用同目录 [tools](tools)，不要另写 CSV/JSON/JAR 解析器。脚本开头写死了工作目录（`l10n_work`，个别脚本写成绝对路径）；换机器时只改这一处。
 
 游戏自带 JDK：`jre\bin\javac.exe` 与 `java.exe`（Java 17）。CSV 写出依赖游戏的 `starsector-core\json.jar`。JAR 补丁依赖 ASM 9.7（`asm-9.7.jar`、`asm-tree-9.7.jar`）。反编译看上下文用 CFR 0.152，只读，不作为写回。
 
@@ -191,6 +224,7 @@ python l10n_work\tools\diff_catalog.py --old l10n_work\projects\vanilla\memory\0
 | tools/apply_sources.py | 有旧版译文时，对齐未改动的 `.java` / `.txt` 引号字符串。从零翻译时直接改源码里的自然语言 |
 | tools/split_chunks.py | 把待译唯一字符串切成每批 80 条的 `chunks/in/NNN.json` |
 | tools/validate_chunk.py | `python validate_chunk.py NNN`。核对条数、`i`、名词类 `$变量`。百分号后的英文单词会被误报，代词类 `$变量` 可以省略 |
+| tools/intel_tags.py | 情报标签核对：把 `getIntelTags` 的 dump 与全部 `tag_data.json` 对照，列出没中文名、仍是中文、重名、译名不一致的 id。用法见「情报标签（intel tags）」 |
 | tools/merge_chunks.py | 按 `pending.jsonl` 的位置，把 `chunks/out` 写回暂存 CSV 的副本。默认只统计；`--apply` 写到 `state/merged`，不改 `state/staged` |
 | tools/align_jars.py | 类名稳定时，按方法内字符串序号把旧 jar 的中文对齐到新 jar。`starfarer_obf.jar` 类名会变，改用 catalog 的序列指纹。从零翻译时不用 |
 | tools/SsJar.java | `dump` 导出 LDC；`patch` 用 ASM 改字符串并重打 jar。`ClassWriter(0)`，不重算栈图 |
@@ -243,6 +277,8 @@ java -cp "l10n_work\classes;l10n_work\lib\asm-9.7.jar;l10n_work\lib\asm-tree-9.7
 
 - 按术语规则保留英文的名称碎片（空间站名生成词）
 - 只有开了控制台才出现的帮助
+
+情报标签不计入待译条数。`getIntelTags()` 返回的是 id，不是句子：要的是 `tag_data.json` 里的一条中文名，不要当正文逐条翻译。见「情报标签（intel tags）」。
 
 计数时这些情况容易数错：
 
@@ -316,6 +352,7 @@ java -cp "l10n_work\classes;l10n_work\lib\asm-9.7.jar;l10n_work\lib\asm-tree-9.7
 - CSV 重新读入后列数与原文一致，`rules.csv` 为 7 列。以解析后的列数和 `OR` 条数为准。物理行数会因换行风格差一行，不能当成丢行。
 - 分批写回同一个文件时，必须带上该文件已经接受的全部译文。只拿后来的一批从英文重写整份文件，会把较早的译文盖回去。直接改在成品上、没有记进这批记录的修改，也会被下一次写回盖掉。
 - JSON 扫描器能再次走完。游戏本体的 `cjkMode` 为 true。模组自己的 `settings.json` 不要写 `cjkMode`。
+- 情报标签：`getIntelTags` 的 dump 里没有「中文 id 与某个英文 id 译名相同」的残留；每个用到的 id 在某份 `tag_data.json` 里恰好一个 `name`，不同 id 不共用中文名；有意保留的中文 id 只限本身以中文命名、且无英文同名的模组标签。跑一遍 `tools/intel_tags.py`，退出码为 0。
 - 走编译时，确认成品 jar 来自版本匹配的源码。走补丁时，重新 dump 输出文件，确认改过的序号已是中文，选项 id、网址和纯格式符仍是原文。两种做法都抽一个已改 class，用 CFR 反编译，确认中文位于界面方法而不是日志。
 
 字段级清单、rules 列和不要碰的文件见 [reference.md](reference.md)。

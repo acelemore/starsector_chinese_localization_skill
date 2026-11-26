@@ -55,6 +55,7 @@
 还要处理：
 
 - config/planets.json、custom_entities.json、tag_data.json、battle_objectives.json、contact_tag_data.json 的 name
+- `tag_data.json` 只补 `name`：键是情报标签 id，不译。字段有 `name`、`color`、`width`、`putFirst`、`sort`；模组可以在自己的 `data/config/tag_data.json` 里按 id 追加。一个 id 一个中文名，不同 id 不能同名。势力 id（在 `.faction` 里用 `id:` 定义）不写，面板会自动显示势力名与势力色。译名表见 `intel_tags.tsv`，细则见 SKILL.md 的「情报标签（intel tags）」
 - world/factions/*.faction 的显示名与官职 `name`。`shipNamePrefix`、颜色、舰船 id 不译
 - characters/skills/*.skill 里的 `name`（如 Elite→精英）
 - variants/**/*.variant 的 `displayName`（Custom→特装，Assault→突击，Strike→打击，Attack→进攻，Support→支援，Standard→标准）
